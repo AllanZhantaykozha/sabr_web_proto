@@ -681,18 +681,18 @@ function openP(id){
       <div class="status" id="st">Выберите размер, и мы покажем наличие.</div>
       <ol class="how">
         <li>Выберите размер и количество.</li>
-        <li>Нажмите «Заказать сразу»: откроется чат @sabr_dostavka с готовым сообщением. Или добавьте в корзину и закажите несколько вещей вместе.</li>
+        <li>Нажмите «Заказать»: откроется чат @sabr_dostavka с готовым сообщением. Или добавьте в корзину и закажите несколько вещей вместе.</li>
         <li>Менеджер подтвердит наличие, цену и доставку.</li>
       </ol>
       <div class="info"><b>Адрес</b> Кокшетау, Назарбаева 29В<br><b>Доставка</b> по всему миру</div>
     </div>
    </div>
-   <div class="sh-f pf"><div class="ps"><div class="qty" id="pq"><button data-q="-1" aria-label="Меньше">−</button><output id="pqn">1</output><button data-q="1" aria-label="Больше">+</button></div><button class="btn main dis" id="add">Выберите размер</button></div><a class="btn line dis" id="ord" target="_blank" rel="noopener">Заказать сразу в Telegram</a></div>`;
+   <div class="sh-f pf"><div class="ps"><div class="qty" id="pq"><button data-q="-1" aria-label="Меньше">−</button><output id="pqn">1</output><button data-q="1" aria-label="Больше">+</button></div><button class="btn main dis" id="add">Выберите размер</button></div><a class="btn line dis" id="ord" target="_blank" rel="noopener">Заказать в Telegram</a></div>`;
   let qty=1;
   const updOrd=()=>{
     const o=$('#ord');if(!size){o.classList.add('dis');return}
     const pre=p.pre.includes(size);
-    o.classList.remove('dis');o.textContent=pre?'Заказать сразу под заказ в Telegram':'Заказать сразу в Telegram';
+    o.classList.remove('dis');o.textContent=pre?'Заказать под заказ в Telegram':'Заказать в Telegram';
     o.href='https://t.me/sabr_dostavka?text='+encodeURIComponent(`Здравствуйте! Хочу ${pre?'заказать ПОД ЗАКАЗ':'заказать'}: ${p.brand} ${p.name}, размер ${size}, ${qty} шт.${p.price!=null?' × '+fmt(p.price)+' ₸ = '+fmt(p.price*qty)+' ₸':''}.${pre?' Подскажите срок.':' Подтвердите наличие и доставку.'}`);
   };
   const pick=s=>{
