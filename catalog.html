@@ -475,6 +475,14 @@ html[data-theme=dark] .low{color:#ff8a73}
 /* конфетти */
 .cfp{position:fixed;z-index:120;width:8px;height:12px;border-radius:2px;pointer-events:none}
 
+/* широкие экраны: фото ниже, кнопки в одну строку — цена и размеры видны без прокрутки */
+@media(min-width:560px){
+  .p-ph.has{height:clamp(220px,36vh,360px)}
+  .p-ph{height:clamp(190px,30vh,300px)}
+  .pf{flex-direction:row;align-items:center}
+  .pf .ps{flex:1;min-width:0}
+  .pf #ord{flex:none;white-space:nowrap;padding-left:18px;padding-right:18px}
+}
 @media(hover:none){.card:hover{translate:none}.cell:hover{transform:none}}
 
 /* кастомные скролл-бары */
