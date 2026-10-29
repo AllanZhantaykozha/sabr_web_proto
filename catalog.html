@@ -393,6 +393,22 @@ body:not(.go) .mast,body:not(.go) .fit h1,body:not(.go) .fit>p,body:not(.go) .rg
 .toast.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
 .toast button{color:#9fb0ff;font-weight:600;white-space:nowrap}
 .ib.shake{animation:bump .4s}
+/* просмотр фото */
+.p-ph.has{cursor:zoom-in}
+.p-ph.has::after{content:'Увеличить';position:absolute;left:12px;bottom:12px;z-index:3;background:rgba(243,245,252,.88);color:var(--chalk);font-size:12px;padding:5px 10px;border-radius:99px;pointer-events:none;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.p-ph.has:hover::after{transform:translateY(-2px)}
+.lb{position:fixed;inset:0;z-index:80;background:rgba(0,6,24,.95);display:none;flex-direction:column}
+.lb.show{display:flex;animation:fadeIn .25s ease-out}
+.lb.closing{animation:fadeOut .2s ease-in forwards}
+.lbx{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;z-index:3}
+.lbs{flex:1;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;padding:56px 0 40px}
+.lbs img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in;animation:lbIn .45s cubic-bezier(.16,1,.3,1)}
+.lbs.z{display:block;padding:56px 0 40px}
+.lbs.z img{max-width:none;max-height:none;width:220%;cursor:zoom-out;animation:none}
+@media(min-width:760px){.lbs.z img{width:170%}}
+.lbh{position:absolute;left:0;right:0;bottom:calc(12px + env(safe-area-inset-bottom));text-align:center;color:rgba(243,245,252,.6);font-size:12.5px;pointer-events:none;transition:opacity .3s}
+.lb.zoomed .lbh{opacity:0}
+@keyframes lbIn{from{opacity:0;transform:scale(.9)}}
 @media(hover:none){.card:hover{translate:none}.cell:hover{transform:none}}
 
 /* кастомные скролл-бары */
@@ -458,6 +474,8 @@ body:not(.go) .mast,body:not(.go) .fit h1,body:not(.go) .fit>p,body:not(.go) .rg
 </div></div>
 
 <div class="ov" id="ovP"><div class="sheet" id="pSheet"></div></div>
+
+<div class="lb" id="lb" aria-hidden="true"><button class="x lbx" id="lbx" aria-label="Закрыть фото">✕</button><div class="lbs" id="lbs"><img id="lbi" alt=""></div><div class="lbh">Нажмите на фото, чтобы приблизить</div></div>
 
 <div class="toast" id="toast" role="status"></div>
 <script src="products.js"></script>
@@ -603,6 +621,15 @@ function applyLabel(){
 }
 function showOv(o){clearTimeout(o._t);o.classList.remove('closing');o.classList.add('show');document.body.style.overflow='hidden'}
 function openF(){D={...S,brands:new Set(S.brands)};const fb=$('#fb');fb.classList.add('fresh');renderF();showOv($('#ovF'));setTimeout(()=>fb.classList.remove('fresh'),800)}
+function openLb(src,alt){
+  const lb=$('#lb'),i=$('#lbi');clearTimeout(lb._t);
+  i.src=src;i.alt=alt||'';$('#lbs').classList.remove('z');lb.classList.remove('closing','zoomed');lb.classList.add('show')}
+function closeLb(){
+  const lb=$('#lb');if(!lb.classList.contains('show')||lb.classList.contains('closing'))return;
+  lb.classList.add('closing');lb._t=setTimeout(()=>lb.classList.remove('show','closing'),210)}
+function toggleLb(){
+  const s=$('#lbs'),z=s.classList.toggle('z');$('#lb').classList.toggle('zoomed',z);
+  if(z){s.scrollLeft=(s.scrollWidth-s.clientWidth)/2;s.scrollTop=(s.scrollHeight-s.clientHeight)/2}}
 function closeAll(){
   if($('#ovP').classList.contains('show')&&!$('#ovP').classList.contains('closing')&&S.cat==='Для вас'){recompute();grid(false)}document.querySelectorAll('.ov.show:not(.closing)').forEach(o=>{o.classList.add('closing');o._t=setTimeout(()=>o.classList.remove('show','closing'),230)});document.body.style.overflow=''}
 const goCatalog=()=>$('#catalog').scrollIntoView({behavior:'smooth',block:'start'});
@@ -623,6 +650,11 @@ document.addEventListener('click',e=>{
   if((el=t.closest('[data-sz]'))){const v=el.dataset.sz,k=kindOf(v);T[k]=T[k]===v?'':v;rulers();return}
   if((el=t.closest('[data-cat]'))){S.cat=el.dataset.cat;render();return}
   if(t.closest('#sBtn')){const s=$('#sr');s.classList.toggle('on');if(s.classList.contains('on'))$('#q').focus();return}
+  if(t.closest('#lbx')){closeLb();return}
+  if(t.closest('#lbi')){toggleLb();return}
+  if(t.id==='lbs'&&!t.classList.contains('z')){closeLb();return}
+  if(t.closest('#lb'))return;
+  if((el=t.closest('.p-ph.has'))){const im=el.querySelector('img');if(im)openLb(im.src,im.alt);return}
   if(t.closest('#fBtn')){openF();return}
   if(t.closest('#cBtn')||t.closest('[data-open-cart]')){openC();return}
   if(t.closest('#cClear')){cart=[];saveCart();renderC();return}
@@ -643,7 +675,7 @@ document.addEventListener('input',e=>{
   if(e.target.id==='pmin'||e.target.id==='pmax'){
     D.min=$('#pmin').value.replace(/\D/g,'');D.max=$('#pmax').value.replace(/\D/g,'');applyLabel()}
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#lb').classList.contains('show'))closeLb();else closeAll()}});
 
 /* корзина */
 const lineKey=l=>l.id+'|'+l.size;
