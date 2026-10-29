@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#f3f5fc">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>document.documentElement.classList.add('js')</script>
 <title>SABR — магазин одежды и обуви, Кокшетау</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -316,5 +318,6 @@ html[data-theme=dark] .tg .moon{display:none}
 <script>
 (function(){const b=document.getElementById('theme');if(b)b.addEventListener('click',()=>window.sabrTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'))})();
 </script>
+<script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
 </body>
 </html>
