@@ -137,7 +137,7 @@ main{max-width:1120px;margin:0 auto;padding:22px 20px 70px;scroll-margin-top:60p
 .empty b{display:block;font-family:var(--serif);font-weight:400;font-size:24px;color:var(--chalk);margin-bottom:8px}
 .btn{display:block;text-align:center;font-weight:600;padding:15px 20px;border-radius:2px;text-decoration:none}
 .btn.main{background:var(--chalk);color:var(--ink)}
-.btn.line{border:1px solid rgba(0,8,40,.4)}
+.btn.line{border:1px solid rgba(0,8,40,.4);color:var(--chalk)}
 .btn.dis{opacity:.35;pointer-events:none}
 .empty .btn{display:inline-block;margin-top:16px}
 
@@ -372,6 +372,8 @@ body:not(.go) .mast,body:not(.go) .fit h1,body:not(.go) .fit>p,body:not(.go) .rg
 .cf .row{display:flex;gap:10px}
 .cf .row .btn{flex:1}
 .cf .row .btn.line{flex:none}
+.pf{flex-direction:column;gap:10px}
+.pf .btn{flex:none}
 .ps{display:flex;gap:10px;align-items:center}
 .ps .qty{flex:none}
 .ps .qty button{width:46px;height:50px}
@@ -678,24 +680,30 @@ function openP(id){
         ${p.pre.length?'<div class="lg"><span><i class="sw"></i>в наличии</span><span><i class="sw h"></i>под заказ</span></div>':''}</div>
       <div class="status" id="st">Выберите размер, и мы покажем наличие.</div>
       <ol class="how">
-        <li>Выберите размер и количество, добавьте в корзину.</li>
-        <li>В корзине нажмите «Заказать»: откроется чат @sabr_dostavka с готовым сообщением.</li>
+        <li>Выберите размер и количество.</li>
+        <li>Нажмите «Заказать»: откроется чат @sabr_dostavka с готовым сообщением. Или добавьте в корзину и закажите несколько вещей вместе.</li>
         <li>Менеджер подтвердит наличие, цену и доставку.</li>
       </ol>
       <div class="info"><b>Адрес</b> Кокшетау, Назарбаева 29В<br><b>Доставка</b> по всему миру</div>
     </div>
    </div>
-   <div class="sh-f"><div class="ps" style="width:100%"><div class="qty" id="pq"><button data-q="-1" aria-label="Меньше">−</button><output id="pqn">1</output><button data-q="1" aria-label="Больше">+</button></div><button class="btn main dis" id="add">Выберите размер</button></div></div>`;
+   <div class="sh-f pf"><div class="ps"><div class="qty" id="pq"><button data-q="-1" aria-label="Меньше">−</button><output id="pqn">1</output><button data-q="1" aria-label="Больше">+</button></div><button class="btn main dis" id="add">Выберите размер</button></div><a class="btn line dis" id="ord" target="_blank" rel="noopener">Заказать в Telegram</a></div>`;
   let qty=1;
+  const updOrd=()=>{
+    const o=$('#ord');if(!size){o.classList.add('dis');return}
+    const pre=p.pre.includes(size);
+    o.classList.remove('dis');o.textContent=pre?'Заказать под заказ в Telegram':'Заказать в Telegram';
+    o.href='https://t.me/sabr_dostavka?text='+encodeURIComponent(`Здравствуйте! Хочу ${pre?'заказать ПОД ЗАКАЗ':'заказать'}: ${p.brand} ${p.name}, размер ${size}, ${qty} шт.${p.price!=null?' × '+fmt(p.price)+' ₸ = '+fmt(p.price*qty)+' ₸':''}.${pre?' Подскажите срок.':' Подтвердите наличие и доставку.'}`);
+  };
   const pick=s=>{
     size=s;const pre=p.pre.includes(s);
     document.querySelectorAll('#pz button').forEach(b=>b.classList.toggle('on',b.dataset.ps===s));
     const st=$('#st');st.className='status '+(pre?'pre':'in');void st.offsetWidth;st.classList.add('flash');
     st.innerHTML=pre?`Размер <b>${s}</b> можно привезти <b>под заказ</b>. Срок уточнит менеджер.`:`Размер <b>${s}</b> <b>в наличии</b>. Можно забрать на Кокшетау, Назарбаева 29В или заказать доставку.`;
-    const o=$('#add');o.classList.remove('dis','rdy');void o.offsetWidth;o.classList.add('rdy');o.textContent='В корзину';
+    const o=$('#add');o.classList.remove('dis','rdy');void o.offsetWidth;o.classList.add('rdy');o.textContent='В корзину';updOrd();
   };
   document.querySelectorAll('#pz button').forEach(b=>b.onclick=()=>pick(b.dataset.ps));
-  $('#pq').onclick=e=>{const d=+(e.target.closest('[data-q]')||{dataset:{}}).dataset.q;if(!d)return;qty=Math.min(10,Math.max(1,qty+d));const o=$('#pqn');o.textContent=qty;o.classList.remove('bump');void o.offsetWidth;o.classList.add('bump')};
+  $('#pq').onclick=e=>{const d=+(e.target.closest('[data-q]')||{dataset:{}}).dataset.q;if(!d)return;qty=Math.min(10,Math.max(1,qty+d));const o=$('#pqn');o.textContent=qty;o.classList.remove('bump');void o.offsetWidth;o.classList.add('bump');updOrd()};
   $('#add').onclick=()=>{
     if(!size)return;
     addToCart(p.id,size,qty);
