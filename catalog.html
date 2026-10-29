@@ -415,7 +415,7 @@ body:not(.go) .mast,body:not(.go) .fit h1,body:not(.go) .fit>p,body:not(.go) .rg
 @keyframes lbIn{from{opacity:0;transform:scale(.9)}}
 /* избранное */
 [data-fav] svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;transition:fill .2s,transform .3s cubic-bezier(.2,.8,.2,1)}
-[data-fav].on{color:#ff4d6d}
+[data-fav].on{color:var(--accent)}
 [data-fav].on svg{fill:currentColor}
 [data-fav].pop svg{animation:pop .45s cubic-bezier(.2,.8,.2,1)}
 .fav{position:absolute;top:10px;right:10px;z-index:4;width:34px;height:34px;border-radius:50%;background:rgba(var(--bgrgb),.85);display:flex;align-items:center;justify-content:center;color:var(--chalk);cursor:pointer;backdrop-filter:blur(4px);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
@@ -838,7 +838,7 @@ async function shareP(id){
   try{await navigator.clipboard.writeText(url);toast('<span>Ссылка скопирована</span>')}catch(e){toast('<span>'+url+'</span>')}}
 function burst(el){
   if(!el||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))return;
-  const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,cols=['#2a45e8','#7f92f2','#ff4d6d','#f4c542','#3ecf8e'];
+  const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,cols=['#2a45e8','#7f92f2','#f4c542','#3ecf8e'];
   for(let i=0;i<16;i++){
     const d=document.createElement('i');d.className='cfp';d.style.left=cx+'px';d.style.top=cy+'px';d.style.background=cols[i%cols.length];document.body.appendChild(d);
     const a=-Math.PI/2+(Math.random()-.5)*2.4,v=90+Math.random()*130,dx=Math.cos(a)*v,dy=Math.sin(a)*v;
