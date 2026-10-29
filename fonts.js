@@ -1,4 +1,5 @@
-/* Шрифты сайта. Быстро сравнить варианты: добавьте к адресу ?font=A, ?font=B, ?font=C, ?font=D или ?font=O (исходный).
+/* Шрифты и тема сайта (подключается в <head> обеих страниц).
+   Шрифты: Быстро сравнить варианты: добавьте к адресу ?font=A, ?font=B, ?font=C, ?font=D или ?font=O (исходный).
    Выбор запоминается в localStorage и действует на обеих страницах. По умолчанию — B. */
 (function(){
   const F={
@@ -14,4 +15,19 @@
   const f=F[k],h=document.head;
   h.insertAdjacentHTML('beforeend','<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family='+f.q+'&display=swap">'
     +'<style>html:root{--serif:'+f.serif+',Georgia,serif;--mark:'+f.mark+',"Times New Roman",serif;--sans:'+f.sans+',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}'+(f.css||'')+'</style>');
+})();
+
+/* Тема: светлая по умолчанию, выбор запоминается. */
+(function(){
+  const root=document.documentElement;
+  function apply(t){
+    root.dataset.theme=t;
+    let m=document.querySelector('meta[name=theme-color]');
+    if(!m){m=document.createElement('meta');m.name='theme-color';document.head.appendChild(m)}
+    m.content=t==='dark'?'#000828':'#f3f5fc';
+  }
+  let t='light';
+  try{t=localStorage.getItem('sabr.theme')==='dark'?'dark':'light'}catch(e){}
+  apply(t);
+  window.sabrTheme=function(n){apply(n);try{localStorage.setItem('sabr.theme',n)}catch(e){}};
 })();
