@@ -316,7 +316,7 @@ html[data-theme=dark] .tg .moon{display:none}
 })();
 </script>
 <script>
-(function(){const b=document.getElementById('theme');if(b)b.addEventListener('click',()=>window.sabrTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'))})();
+(function(){const b=document.getElementById('theme');if(b)b.addEventListener('click',e=>window.sabrTheme(document.documentElement.dataset.theme==='dark'?'light':'dark',e))})();
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
 </body>

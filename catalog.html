@@ -141,7 +141,8 @@ main{max-width:1120px;margin:0 auto;padding:22px 20px 70px;scroll-margin-top:60p
 .btn{display:block;text-align:center;font-weight:600;padding:15px 20px;border-radius:2px;text-decoration:none}
 .btn.main{background:var(--chalk);color:var(--ink)}
 .btn.line{border:1px solid rgba(var(--rgb),.4);color:var(--chalk)}
-.btn.dis{opacity:.35;pointer-events:none}
+.btn.dis{pointer-events:none;opacity:1;background:rgba(var(--rgb),.09);color:var(--mute);border:1px solid var(--line);box-shadow:none}
+.btn.dis::after{display:none}
 .empty .btn{display:inline-block;margin-top:16px}
 
 footer{border-top:1px solid var(--line);padding:34px 20px 50px;max-width:1120px;margin:0 auto;display:grid;gap:22px;color:var(--mute);font-size:14px}
@@ -956,7 +957,7 @@ addEventListener('scroll',()=>barEl.classList.toggle('stuck',barEl.getBoundingCl
 })();
 </script>
 <script>
-(function(){const b=document.getElementById('theme');if(b)b.addEventListener('click',()=>window.sabrTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'))})();
+(function(){const b=document.getElementById('theme');if(b)b.addEventListener('click',e=>window.sabrTheme(document.documentElement.dataset.theme==='dark'?'light':'dark',e))})();
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
 </body>

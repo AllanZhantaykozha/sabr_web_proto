@@ -29,5 +29,23 @@
   let t='light';
   try{t=localStorage.getItem('sabr.theme')==='dark'?'dark':'light'}catch(e){}
   apply(t);
-  window.sabrTheme=function(n){apply(n);try{localStorage.setItem('sabr.theme',n)}catch(e){}};
+  const css=document.createElement('style');
+  css.textContent='::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}'
+    +'::view-transition-old(root){z-index:1}::view-transition-new(root){z-index:2}'
+    +'html.tt *,html.tt *::before,html.tt *::after{transition:background-color .5s ease,color .5s ease,border-color .5s ease,fill .5s ease,stroke .5s ease,box-shadow .5s ease!important}';
+  document.head.appendChild(css);
+  window.sabrTheme=function(n,ev){
+    const save=()=>{try{localStorage.setItem('sabr.theme',n)}catch(e){}};
+    const calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(calm){apply(n);save();return}
+    /* плавный круговой «разлив» новой темы от кнопки; запасной вариант — мягкая смена цветов */
+    if(document.startViewTransition){
+      const r=ev&&ev.currentTarget?ev.currentTarget.getBoundingClientRect():null;
+      const x=r?r.left+r.width/2:innerWidth-40,y=r?r.top+r.height/2:40;
+      const rad=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
+      const t=document.startViewTransition(()=>apply(n));
+      t.ready.then(()=>root.animate({clipPath:['circle(0px at '+x+'px '+y+'px)','circle('+rad+'px at '+x+'px '+y+'px)']},{duration:750,easing:'cubic-bezier(.65,0,.25,1)',pseudoElement:'::view-transition-new(root)'})).catch(()=>{});
+      save();return}
+    root.classList.add('tt');apply(n);save();setTimeout(()=>root.classList.remove('tt'),600);
+  };
 })();
