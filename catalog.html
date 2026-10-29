@@ -496,6 +496,7 @@ const jset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 let viewed=jget(VKEY,[]).filter(id=>P.some(p=>p.id===id));
 let cart=jget(CKEY,[]).filter(l=>P.some(p=>p.id===l.id)&&l.qty>0);
 let REC=new Set();
+const CART_W=1.6;
 function loadSz(){try{const o=JSON.parse(localStorage.getItem(KEY)||'{}');return{shoe:SH.includes(o.shoe)?o.shoe:'',cloth:CL.includes(o.cloth)?o.cloth:''}}catch(e){return{shoe:'',cloth:''}}}
 function saveSz(){try{localStorage.setItem(KEY,JSON.stringify(S.sz))}catch(e){}}
 const S={cat:'Все',sz:loadSz(),q:'',sort:'def',brands:new Set(),avail:'all',min:'',max:''};
@@ -523,7 +524,9 @@ function recompute(){
   score.clear();REC=new Set();
   const br={},ct={};
   viewed.forEach((id,i)=>{const p=P.find(x=>x.id===id);if(!p)return;const w=1/(1+i*.18);br[p.brand]=(br[p.brand]||0)+w;ct[p.cat]=(ct[p.cat]||0)+w});
-  const seen=new Set(viewed);
+  /* добавление в корзину — более сильный сигнал, чем просмотр */
+  cart.forEach(l=>{const p=P.find(x=>x.id===l.id);if(!p)return;br[p.brand]=(br[p.brand]||0)+CART_W;ct[p.cat]=(ct[p.cat]||0)+CART_W});
+  const seen=new Set([...viewed,...cart.map(l=>l.id)]);
   P.forEach(p=>{
     let sc=(br[p.brand]||0)*2+(ct[p.cat]||0)*.8;
     if(!viewed.length)sc=p.isNew?1:0;
@@ -631,7 +634,7 @@ function toggleLb(){
   const s=$('#lbs'),z=s.classList.toggle('z');$('#lb').classList.toggle('zoomed',z);
   if(z){s.scrollLeft=(s.scrollWidth-s.clientWidth)/2;s.scrollTop=(s.scrollHeight-s.clientHeight)/2}}
 function closeAll(){
-  if($('#ovP').classList.contains('show')&&!$('#ovP').classList.contains('closing')&&S.cat==='Для вас'){recompute();grid(false)}document.querySelectorAll('.ov.show:not(.closing)').forEach(o=>{o.classList.add('closing');o._t=setTimeout(()=>o.classList.remove('show','closing'),230)});document.body.style.overflow=''}
+  if(S.cat==='Для вас'&&['#ovP','#ovC'].some(i=>$(i).classList.contains('show')&&!$(i).classList.contains('closing'))){recompute();grid(false)}document.querySelectorAll('.ov.show:not(.closing)').forEach(o=>{o.classList.add('closing');o._t=setTimeout(()=>o.classList.remove('show','closing'),230)});document.body.style.overflow=''}
 const goCatalog=()=>$('#catalog').scrollIntoView({behavior:'smooth',block:'start'});
 
 document.addEventListener('click',e=>{
@@ -681,7 +684,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#lb').classLi
 const lineKey=l=>l.id+'|'+l.size;
 const cartCount=()=>cart.reduce((n,l)=>n+l.qty,0);
 function cartBadge(bump){const n=cartCount(),b=$('#cBd');b.textContent=n;b.classList.toggle('on',n>0);if(bump){b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump');const c=$('#cBtn');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake')}}
-function saveCart(){jset(CKEY,cart);cartBadge()}
+function saveCart(){jset(CKEY,cart);cartBadge();recompute();tabs()}
 let toastT;
 function toast(html){const t=$('#toast');t.innerHTML=html;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200)}
 function addToCart(id,size,qty){
