@@ -394,6 +394,15 @@ body:not(.go) .mast,body:not(.go) .fit h1,body:not(.go) .fit>p,body:not(.go) .rg
 .toast button{color:#9fb0ff;font-weight:600;white-space:nowrap}
 .ib.shake{animation:bump .4s}
 @media(hover:none){.card:hover{translate:none}.cell:hover{transform:none}}
+
+/* кастомные скролл-бары */
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,8,40,.28);border:3px solid transparent;background-clip:content-box;border-radius:12px;transition:background .2s}
+::-webkit-scrollbar-thumb:hover{background:var(--cobalt);background-clip:content-box}
+::-webkit-scrollbar-thumb:active{background:#1c33c4;background-clip:content-box}
+::-webkit-scrollbar-corner{background:transparent}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:rgba(0,8,40,.3) transparent}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
