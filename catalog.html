@@ -339,7 +339,16 @@ body:not(.go) .mast,body:not(.go) .fit h1,body:not(.go) .fit>p,body:not(.go) .rg
 .tabw{min-width:0;flex:1;overflow-x:auto;scrollbar-width:none}
 .tabw::-webkit-scrollbar{display:none}
 .tabs{width:max-content}
-@media(max-width:480px){.tabs{gap:12px}.tab{font-size:14px}.tab sup{display:none}.ib{width:32px}.icons{gap:2px}}
+.r2{display:flex;align-items:center;gap:8px;padding:2px 0 12px}
+.r2 .sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-size:14px;transition:background .2s,color .2s,border-color .2s}
+.chip svg{width:17px;height:17px;flex:none}
+.chip:hover{border-color:var(--chalk)}
+.chip.on{background:var(--chalk);color:var(--ink);border-color:var(--chalk)}
+.chip .bd{position:static;margin-left:1px;min-width:18px;height:18px}
+.r2 .ib{width:38px;height:38px}
+.r2 .ib .bd{top:0;right:-2px}
+.pills{padding-top:0}
 .tab.rec{color:var(--cobalt)}
 .tab.rec.on{color:var(--chalk)}
 
@@ -396,12 +405,13 @@ body:not(.go) .mast,body:not(.go) .fit h1,body:not(.go) .fit>p,body:not(.go) .rg
 <div class="bar" id="bar"><div class="bar-in">
   <div class="r1">
     <div class="tabw"><div class="tabs" id="tabs"></div><i class="ind" id="ind"></i></div>
-    <div class="icons">
-      <button class="ib" id="zBtn" aria-label="Размер"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="1"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/></svg></button>
-      <button class="ib" id="sBtn" aria-label="Поиск"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></button>
-      <button class="ib" id="cBtn" aria-label="Корзина"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg><span class="bd" id="cBd"></span></button>
-      <button class="ib" id="fBtn" aria-label="Фильтры"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span class="bd" id="bd"></span></button>
-    </div>
+  </div>
+  <div class="r2">
+    <button class="chip" id="zBtn" aria-label="Размер"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="1"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/></svg><span id="zLbl">Размер</span></button>
+    <button class="chip" id="fBtn" aria-label="Фильтры"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span>Фильтры</span><span class="bd" id="bd"></span></button>
+    <span class="sp"></span>
+    <button class="ib" id="sBtn" aria-label="Поиск"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></button>
+    <button class="ib" id="cBtn" aria-label="Корзина"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg><span class="bd" id="cBd"></span></button>
   </div>
   <div class="sr" id="sr"><div><input id="q" type="search" placeholder="Бренд или название" autocomplete="off"></div></div>
   <div class="pills" id="pills"></div>
@@ -427,7 +437,7 @@ body:not(.go) .mast,body:not(.go) .fit h1,body:not(.go) .fit>p,body:not(.go) .rg
 <div class="ov" id="ovS"><div class="sheet">
   <div class="sh-h"><h2>Какой у вас размер?</h2></div>
   <div class="sh-b zb"><p class="zp">Покажем то, что есть в вашем размере, и то, что можно привезти под заказ.</p><div id="rulers"></div><p class="note">Цифра под размером — сколько моделей есть в этом размере.</p></div>
-  <div class="sh-f"><button class="btn line" id="zCancel">Отмена</button><button class="btn main dis" id="zApply">Выбрать</button></div>
+  <div class="sh-f"><button class="btn line" id="zCancel">Отмена</button><button class="btn main" id="zApply">Выбрать</button></div>
 </div></div>
 
 <div class="ov" id="ovC"><div class="sheet" id="cSheet">
@@ -506,7 +516,7 @@ function rulers(){
     return `<button class="cell ${on?'on':''}" data-sz="${x}" style="--i:${i};--g:${g}" ${n||on?'':'disabled'}><b>${x}</b><small>${n}</small></button>`}).join('')}</div></div>`;
   $('#rulers').innerHTML=row('Обувь',SH,0)+row('Одежда',CL,1);
   $('#rulers').classList.toggle('intro',!rulers.done);rulers.done=true;
-  const l=szList(T),ap=$('#zApply');ap.textContent=l.length?`Выбрать ${l.join(', ')}`:'Выбрать';ap.classList.toggle('dis',!l.length);
+  const l=szList(T),ap=$('#zApply');ap.textContent=l.length?`Выбрать ${l.join(', ')}`:'Показать всё';
 }
 function openSize(){T={...S.sz};rulers.done=false;rulers();showOv($('#ovS'))}
 function tabs(){
@@ -520,13 +530,12 @@ addEventListener('resize',moveInd);if(document.fonts)document.fonts.ready.then(m
 const AVL={stock:'В наличии',pre:'Под заказ'};
 function pills(){
   const o=[];
-  if(S.sz.shoe) o.push(`<button class="pill" data-up>Обувь <b>${S.sz.shoe}</b><i data-rm="shoe">✕</i></button>`);
-  if(S.sz.cloth) o.push(`<button class="pill" data-up>Одежда <b>${S.sz.cloth}</b><i data-rm="cloth">✕</i></button>`);
   if(S.avail!=='all') o.push(`<span class="pill">${AVL[S.avail]}<i data-rm="avail">✕</i></span>`);
   S.brands.forEach(b=>o.push(`<span class="pill">${b}<i data-rm="brand:${b}">✕</i></span>`));
   if(S.min!==''||S.max!=='') o.push(`<span class="pill">${S.min!==''?fmt(+S.min):'0'}–${S.max!==''?fmt(+S.max):'∞'} ₸<i data-rm="price">✕</i></span>`);
   if(o.length>1||S.q) o.push(`<button class="pill clear" data-rm="all">Сбросить</button>`);
   $('#pills').innerHTML=o.join('');
+  const zl=szList(S.sz);$('#zLbl').textContent=zl.length?zl.join(' · '):'Размер';$('#zBtn').classList.toggle('on',zl.length>0);
   const n=fcount(),bd=$('#bd'),prev=bd.textContent;bd.textContent=n;bd.classList.toggle('on',n>0);
   if(n>0&&prev!==String(n)){bd.classList.remove('bump');void bd.offsetWidth;bd.classList.add('bump')}
 }
@@ -599,7 +608,7 @@ document.addEventListener('click',e=>{
     render();e.stopPropagation();return}
   if(t.closest('[data-up]')||t.closest('#zBtn')){openSize();return}
   if(t.closest('#zCancel')){closeAll();return}
-  if(t.closest('#zApply')){if(!szList(T).length)return;S.sz={...T};saveSz();recompute();S.cat=T.shoe&&!T.cloth?'Обувь':T.cloth&&!T.shoe?'Одежда':'Все';closeAll();render();return}
+  if(t.closest('#zApply')){S.sz={...T};saveSz();recompute();S.cat=T.shoe&&!T.cloth?'Обувь':T.cloth&&!T.shoe?'Одежда':'Все';closeAll();render();return}
   if((el=t.closest('[data-sz]'))){const v=el.dataset.sz,k=kindOf(v);T[k]=T[k]===v?'':v;rulers();return}
   if((el=t.closest('[data-cat]'))){S.cat=el.dataset.cat;render();return}
   if(t.closest('#sBtn')){const s=$('#sr');s.classList.toggle('on');if(s.classList.contains('on'))$('#q').focus();return}
