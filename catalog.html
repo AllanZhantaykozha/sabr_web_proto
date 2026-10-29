@@ -285,7 +285,7 @@ a.mark:hover{letter-spacing:.3em}
 .tagp{z-index:3;transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
 .card:hover .tagp{transform:translateX(6px);box-shadow:0 8px 20px -8px rgba(0,4,20,.25)}
 .flag{z-index:3;display:flex;align-items:center;gap:7px}
-.flag:not(.demo)::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:ping 2s ease-out infinite}
+.flag:not(.demo)::before{content:'✦';color:var(--accent);font-size:11px;line-height:1}
 .nm{transition:color .25s,transform .4s cubic-bezier(.2,.8,.2,1)}
 .card:hover .nm{transform:translateX(3px);color:var(--cobalt)}
 .count{animation:fadeIn .5s}
@@ -396,6 +396,8 @@ body:not(.go) .mast,body:not(.go) .fit h1,body:not(.go) .fit>p,body:not(.go) .rg
 .ps .btn{flex:1}
 .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));width:max-content;z-index:60;transform:translate(-50%,-30px);opacity:0;pointer-events:none;background:var(--chalk);color:var(--ink);padding:12px 16px;border-radius:3px;font-size:14px;display:flex;gap:14px;align-items:center;box-shadow:0 16px 36px -12px rgba(0,4,20,.5);transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .3s;max-width:calc(100vw - 32px)}
 .toast.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+.toast.b{top:auto;transform:translate(-50%,24px)}
+.toast.b.show{transform:translate(-50%,0)}
 .toast button{color:var(--tlink);font-weight:600;white-space:nowrap}
 .ib.shake{animation:bump .4s}
 /* просмотр фото */
@@ -784,7 +786,13 @@ const cartCount=()=>cart.reduce((n,l)=>n+l.qty,0);
 function cartBadge(bump){const n=cartCount(),b=$('#cBd');b.textContent=n;b.classList.toggle('on',n>0);if(bump){b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump');const c=$('#cBtn');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake')}}
 function saveCart(){jset(CKEY,cart);cartBadge();recompute();tabs()}
 let toastT;
-function toast(html){const t=$('#toast');t.innerHTML=html;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200)}
+function toast(html){
+  const t=$('#toast');t.innerHTML=html;
+  /* когда открыта карточка товара — показываем уведомление над нижней панелью, чтобы не закрывать кнопки */
+  const f=$('#ovP').classList.contains('show')&&document.querySelector('#pSheet .sh-f');
+  if(f){const r=f.getBoundingClientRect();t.classList.add('b');t.style.bottom=(innerHeight-r.top+10)+'px'}
+  else{t.classList.remove('b');t.style.bottom=''}
+t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200)}
 function addToCart(id,size,qty){
   const l=cart.find(x=>x.id===id&&x.size===size);
   if(l)l.qty=Math.min(10,l.qty+qty);else cart.push({id,size,qty});
