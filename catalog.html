@@ -325,11 +325,14 @@ a.mark:hover{letter-spacing:.3em}
 
 footer a{color:var(--chalk);text-decoration-color:rgba(232,236,248,.3);transition:text-decoration-color .25s,color .25s}
 footer a:hover{text-decoration-color:var(--chalk)}
+/* вход страницы ждёт, пока уйдёт заставка */
+body:not(.go) .mast,body:not(.go) .fit h1,body:not(.go) .fit>p,body:not(.go) .rg,body:not(.go) .card{animation-play-state:paused}
 @media(hover:none){.card:hover{translate:none}.cell:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
+<div class="splash" id="splash" aria-hidden="true"><div class="sp-in"><div class="sp-mark"><span style="--n:0">S</span><span style="--n:1">A</span><span style="--n:2">B</span><span style="--n:3">R</span></div><div class="sp-line"></div><div class="sp-sub">Каталог</div></div></div>
 <div class="proto">Прототип: фото и часть товаров — заглушки</div>
 
 <header class="mast"><a class="mark" href="index.html">SABR</a><nav class="mn"><a href="index.html">О магазине</a><a class="on" href="catalog.html">Каталог</a></nav></header>
@@ -570,7 +573,14 @@ render();
 
 const barEl=$('#bar');
 addEventListener('scroll',()=>barEl.classList.toggle('stuck',barEl.getBoundingClientRect().top<=0),{passive:true});
-document.body.classList.add("go");
+(function(){
+  const sp=$('#splash'),go=()=>document.body.classList.add('go');
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){sp.remove();go();return}
+  document.body.style.overflow='hidden';
+  let done=false;
+  const out=()=>{if(done)return;done=true;sp.classList.add('out');setTimeout(go,380);setTimeout(()=>{sp.remove();if(!document.querySelector('.ov.show'))document.body.style.overflow=''},800)};
+  setTimeout(out,1100);sp.addEventListener('click',out);
+})();
 </script>
 </body>
 </html>
