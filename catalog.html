@@ -403,17 +403,24 @@ const stockOf=p=>p.sizes.filter(x=>!p.pre.includes(x));
 const $=s=>document.querySelector(s);
 const fmt=n=>n.toLocaleString('ru-RU').replace(/\u00a0/g,' ');
 const plural=n=>{const a=n%10,b=n%100;return b>10&&b<20?'моделей':a===1?'модель':a>1&&a<5?'модели':'моделей'};
-const S={cat:'Все',size:'',q:'',sort:'def',brands:new Set(),avail:'all',min:'',max:''};
-let D=null,T='';
+const KEY='sabr.sizes';
+function loadSz(){try{const o=JSON.parse(localStorage.getItem(KEY)||'{}');return{shoe:SH.includes(o.shoe)?o.shoe:'',cloth:CL.includes(o.cloth)?o.cloth:''}}catch(e){return{shoe:'',cloth:''}}}
+function saveSz(){try{localStorage.setItem(KEY,JSON.stringify(S.sz))}catch(e){}}
+const S={cat:'Все',sz:loadSz(),q:'',sort:'def',brands:new Set(),avail:'all',min:'',max:''};
+let D=null,T={shoe:'',cloth:''};
+const kindOf=x=>SH.includes(x)?'shoe':'cloth';
+const szOf=(p,s)=>p.cat==='Обувь'?s.sz.shoe:s.sz.cloth;
+const szList=sz=>[sz.shoe,sz.cloth].filter(Boolean);
 
 function match(p,s,skip){
   if(s.cat!=='Все'&&p.cat!==s.cat) return false;
-  if(s.size&&!p.sizes.includes(s.size)) return false;
+  const sz=szOf(p,s);
+  if(sz&&!p.sizes.includes(sz)) return false;
   const q=s.q.trim().toLowerCase();
   if(q&&!(p.brand+' '+p.name).toLowerCase().includes(q)) return false;
   if(skip!=='brands'&&s.brands.size&&!s.brands.has(p.brand)) return false;
-  if(s.avail==='stock'&&!(s.size?!p.pre.includes(s.size):stockOf(p).length)) return false;
-  if(s.avail==='pre'&&!(s.size?p.pre.includes(s.size):p.pre.length)) return false;
+  if(s.avail==='stock'&&!(sz?!p.pre.includes(sz):stockOf(p).length)) return false;
+  if(s.avail==='pre'&&!(sz?p.pre.includes(sz):p.pre.length)) return false;
   if(s.min!==''&&(p.price==null||p.price<+s.min)) return false;
   if(s.max!==''&&(p.price==null||p.price>+s.max)) return false;
   return true;
@@ -423,15 +430,15 @@ const fcount=()=>S.brands.size+(S.avail!=='all'?1:0)+(S.min!==''||S.max!==''?1:0
 
 /* подбор размера */
 function rulers(){
-  const cnt=x=>P.filter(p=>match(p,{...S,size:x,cat:'Все',q:''})).length;
+  const cnt=x=>{const k=kindOf(x);return P.filter(p=>(p.cat==='Обувь')===(k==='shoe')&&match(p,{...S,sz:{...S.sz,[k]:x},cat:'Все',q:''})).length};
   const row=(t,arr,g)=>`<div class="rg"><div class="rt">${t}</div><div class="rl">${arr.map((x,i)=>{
-    const n=cnt(x),on=T===x;
+    const n=cnt(x),on=T[kindOf(x)]===x;
     return `<button class="cell ${on?'on':''}" data-sz="${x}" style="--i:${i};--g:${g}" ${n||on?'':'disabled'}><b>${x}</b><small>${n}</small></button>`}).join('')}</div></div>`;
   $('#rulers').innerHTML=row('Обувь',SH,0)+row('Одежда',CL,1);
   $('#rulers').classList.toggle('intro',!rulers.done);rulers.done=true;
-  const ap=$('#zApply');ap.textContent=T?`Выбрать ${T}`:'Выбрать';ap.classList.toggle('dis',!T);
+  const l=szList(T),ap=$('#zApply');ap.textContent=l.length?`Выбрать ${l.join(', ')}`:'Выбрать';ap.classList.toggle('dis',!l.length);
 }
-function openSize(){T=S.size;rulers.done=false;rulers();showOv($('#ovS'))}
+function openSize(){T={...S.sz};rulers.done=false;rulers();showOv($('#ovS'))}
 function tabs(){
   $('#tabs').innerHTML=['Все','Обувь','Одежда'].map(c=>{
     const n=items({...S,cat:c}).length;
@@ -443,7 +450,8 @@ addEventListener('resize',moveInd);if(document.fonts)document.fonts.ready.then(m
 const AVL={stock:'В наличии',pre:'Под заказ'};
 function pills(){
   const o=[];
-  if(S.size) o.push(`<button class="pill" data-up>Размер <b>${S.size}</b><i data-rm="size">✕</i></button>`);
+  if(S.sz.shoe) o.push(`<button class="pill" data-up>Обувь <b>${S.sz.shoe}</b><i data-rm="shoe">✕</i></button>`);
+  if(S.sz.cloth) o.push(`<button class="pill" data-up>Одежда <b>${S.sz.cloth}</b><i data-rm="cloth">✕</i></button>`);
   if(S.avail!=='all') o.push(`<span class="pill">${AVL[S.avail]}<i data-rm="avail">✕</i></span>`);
   S.brands.forEach(b=>o.push(`<span class="pill">${b}<i data-rm="brand:${b}">✕</i></span>`));
   if(S.min!==''||S.max!=='') o.push(`<span class="pill">${S.min!==''?fmt(+S.min):'0'}–${S.max!==''?fmt(+S.max):'∞'} ₸<i data-rm="price">✕</i></span>`);
@@ -453,7 +461,8 @@ function pills(){
   if(n>0&&prev!==String(n)){bd.classList.remove('bump');void bd.offsetWidth;bd.classList.add('bump')}
 }
 function avLine(p){
-  if(S.size){const pre=p.pre.includes(S.size);return `<i class="sw ${pre?'h':''}"></i>${S.size}, ${pre?'под заказ':'в наличии'}`}
+  const sz=szOf(p,S);
+  if(sz){const pre=p.pre.includes(sz);return `<i class="sw ${pre?'h':''}"></i>${sz}, ${pre?'под заказ':'в наличии'}`}
   if(!stockOf(p).length) return `<i class="sw h"></i>только под заказ`;
   const r=`${p.sizes[0]}–${p.sizes[p.sizes.length-1]}`;
   return p.pre.length?`<i class="sw"></i><i class="sw h"></i>${r}, часть под заказ`:`<i class="sw"></i>${r}`;
@@ -464,13 +473,13 @@ function grid(anim=true){
   $('#grid').classList.toggle('still',!anim);
   if(S.sort==='asc') l.sort((a,b)=>(a.price??1e9)-(b.price??1e9));
   else if(S.sort==='desc') l.sort((a,b)=>(b.price??-1)-(a.price??-1));
-  else if(S.size) l.sort((a,b)=>a.pre.includes(S.size)-b.pre.includes(S.size));
-  $('#count').textContent=l.length?`${l.length} ${plural(l.length)}${S.size?`, размер ${S.size}`:''}`:'';
+  else if(szList(S.sz).length) l.sort((a,b)=>a.pre.includes(szOf(a,S))-b.pre.includes(szOf(b,S)));
+  $('#count').textContent=l.length?`${l.length} ${plural(l.length)}${szList(S.sz).length?`, размер ${szList(S.sz).join(', ')}`:''}`:'';
   $('#grid').innerHTML=l.length?l.map((p,i)=>`
    <button class="card" data-id="${p.id}" style="--i:${Math.min(i,10)}">
      <div class="ph ${p.img?'has':''}">${art(p)}${p.isNew?'<span class="flag">Новинка</span>':p.demo?'<span class="flag demo">пример</span>':''}<span class="tagp">${pr(p)}</span></div>
      <div class="meta"><div class="br">${p.brand}</div><div class="nm">${p.name}</div><div class="av">${avLine(p)}</div></div>
-   </button>`).join(''):`<div class="empty"><b>Ничего не нашлось</b>${S.size?`В размере ${S.size} нет моделей с такими фильтрами.`:'Попробуйте изменить фильтры.'}<br><button class="btn line" data-rm="all">Сбросить фильтры</button></div>`;
+   </button>`).join(''):`<div class="empty"><b>Ничего не нашлось</b>${szList(S.sz).length?`В размере ${szList(S.sz).join(', ')} нет моделей с такими фильтрами.`:'Попробуйте изменить фильтры.'}<br><button class="btn line" data-rm="all">Сбросить фильтры</button></div>`;
 }
 function render(){tabs();pills();grid()}
 
@@ -510,17 +519,17 @@ document.addEventListener('click',e=>{
   const t=e.target;let el;
   if((el=t.closest('[data-rm]'))){
     const [k,v]=el.dataset.rm.split(':');
-    if(k==='size')S.size='';
+    if(k==='shoe'||k==='cloth'){S.sz[k]='';saveSz();if(S.cat!=='Все'&&!szList(S.sz).length)S.cat='Все'}
     else if(k==='avail')S.avail='all';
     else if(k==='brand')S.brands.delete(v);
     else if(k==='price'){S.min='';S.max=''}
-    else if(k==='all'){S.size='';S.avail='all';S.brands.clear();S.min='';S.max='';S.q='';S.cat='Все';$('#q').value=''}
+    else if(k==='all'){S.sz={shoe:'',cloth:''};saveSz();S.avail='all';S.brands.clear();S.min='';S.max='';S.q='';S.cat='Все';$('#q').value=''}
     render();e.stopPropagation();return}
   if(t.closest('[data-up]')||t.closest('#zBtn')){openSize();return}
   if(t.closest('#zCancel')){closeAll();return}
-  if(t.closest('#zApply')){if(!T)return;S.size=T;S.cat=SH.includes(T)?'Обувь':'Одежда';closeAll();render();return}
-  if((el=t.closest('[data-sz]'))){T=T===el.dataset.sz?'':el.dataset.sz;rulers();return}
-  if((el=t.closest('[data-cat]'))){S.cat=el.dataset.cat;if(S.size&&S.cat!=='Все'&&((S.cat==='Обувь')!==SH.includes(S.size)))S.size='';render();return}
+  if(t.closest('#zApply')){if(!szList(T).length)return;S.sz={...T};saveSz();S.cat=T.shoe&&!T.cloth?'Обувь':T.cloth&&!T.shoe?'Одежда':'Все';closeAll();render();return}
+  if((el=t.closest('[data-sz]'))){const v=el.dataset.sz,k=kindOf(v);T[k]=T[k]===v?'':v;rulers();return}
+  if((el=t.closest('[data-cat]'))){S.cat=el.dataset.cat;render();return}
   if(t.closest('#sBtn')){const s=$('#sr');s.classList.toggle('on');if(s.classList.contains('on'))$('#q').focus();return}
   if(t.closest('#fBtn')){openF();return}
   if((el=t.closest('[data-av]'))){D.avail=el.dataset.av;renderF();return}
@@ -542,7 +551,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
 /* товар */
 function openP(id){
   const p=P.find(x=>x.id===id);
-  let size=S.size&&p.sizes.includes(S.size)?S.size:null;
+  const ps=szOf(p,S);let size=ps&&p.sizes.includes(ps)?ps:null;
   const n=p.sizes.length;
   $('#pSheet').innerHTML=`
    <button class="x x-abs" data-close aria-label="Закрыть">✕</button>
@@ -576,12 +585,13 @@ function openP(id){
   if(size)pick(size);
   showOv($('#ovP'));
 }
+{const l=S.sz;S.cat=l.shoe&&!l.cloth?'Обувь':l.cloth&&!l.shoe?'Одежда':'Все'}
 render();
 
 const barEl=$('#bar');
 addEventListener('scroll',()=>barEl.classList.toggle('stuck',barEl.getBoundingClientRect().top<=0),{passive:true});
 (function(){
-  const sp=$('#splash'),go=()=>{document.body.classList.add('go');openSize()};
+  const sp=$('#splash'),go=()=>{document.body.classList.add('go');if(!szList(S.sz).length)openSize()};
   if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){sp.remove();go();return}
   document.body.style.overflow='hidden';
   let done=false;
